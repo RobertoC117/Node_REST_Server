@@ -1,4 +1,9 @@
+/**
+ * ESQUEMA Y MODELO DE LOS USUARIOS
+ */
+
 const mongoose = require('mongoose');
+const uniqueValidator = require('mongoose-unique-validator');
 
 //Referencia a la clase Schema
 let Schema = mongoose.Schema;
@@ -11,6 +16,7 @@ let UsuarioSchema = new Schema({
     },
     email:{
         type: String,
+        unique: true,
         required: [true, 'El correo es necesario']
     },
     password:{
@@ -23,7 +29,11 @@ let UsuarioSchema = new Schema({
     },
     role:{
         type: String,
-        default: 'USER'//Valor por defecto
+        enum:{
+            values: ['ADMIN_ROLE, USER_ROLE'],
+            message: '{VALUE} no es un role valido'
+        },
+        default: 'USER_ROLE'//Valor por defecto
     },
     estado:{
         type: Boolean,
@@ -34,5 +44,7 @@ let UsuarioSchema = new Schema({
         default: false
     }
 });
+
+UsuarioSchema.plugin(uniqueValidator)
 
 module.exports = mongoose.model('Usuario', UsuarioSchema)
