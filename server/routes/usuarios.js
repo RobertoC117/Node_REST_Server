@@ -2,8 +2,9 @@
  * ADMINISTRACION DE LAS RUTAS DE LOS USUARIOS
  */
 const express = require('express');
-const app = express();
+const bcrypt = require('bcrypt')
 const Usuario = require('../models/usuarios')//Modelo de Usuario
+const app = express();
 
 app.get('/', (req, res) => {
     res.send("main")
@@ -17,10 +18,10 @@ app.post('/usuario', (req, res) => {
 
     let data = req.body;//Obtiene el cuerpo de la peticion
 
-    let usuario = new Usuario({//Crea un nuevo objeto
+    let usuario = new Usuario({//Crea un nuevo objeto del modelo
         nombre: data.nombre,
         email: data.email,
-        password: data.password,
+        password: bcrypt.hashSync( data.password, 10),
         role: data.role,
     });
 
@@ -32,6 +33,8 @@ app.post('/usuario', (req, res) => {
                 err,
             });
         }
+
+        usuarioDB.password = null;
 
         res.json({//Si es exitoso envia un true y muestra los datos del usuario insertado
             ok: true, 

@@ -29,11 +29,11 @@ let UsuarioSchema = new Schema({
     },
     role:{
         type: String,
+        default: 'USER_ROLE',//Valor por defecto
         enum:{
-            values: ['ADMIN_ROLE, USER_ROLE'],
+            values: ['ADMIN_ROLE', 'USER_ROLE'],
             message: '{VALUE} no es un role valido'
-        },
-        default: 'USER_ROLE'//Valor por defecto
+        }
     },
     estado:{
         type: Boolean,
@@ -44,6 +44,13 @@ let UsuarioSchema = new Schema({
         default: false
     }
 });
+
+// UsuarioSchema.methods.toJSON =  function(){
+//     let user = this;
+//     let userObject = user.toObject();
+//     delete userObject.password;
+//     return userObject;
+// }
 
 UsuarioSchema.plugin(uniqueValidator)
 
