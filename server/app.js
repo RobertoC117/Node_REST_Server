@@ -1,4 +1,9 @@
+/**
+ * SERVER
+ */
 const express = require('express');
+const mongoose = require('mongoose');
+
 const app = express();
 
 require('./config/config');
@@ -39,6 +44,12 @@ app.put('/usuario/:id', (req, res) => {
 app.delete('/usuario', (req, res) => {
     //res.json({nombre:"Roberto"})
     res.send("deleteUsuario")
+});
+
+mongoose.connect('mongodb://localhost:27017/cafe', {useNewUrlParser: true, useUnifiedTopology: true} ,(err) =>{
+    if(err) throw err;  
+
+    console.log('Conectado :)')
 });
 
 app.listen(process.env.PORT ,()=>{
