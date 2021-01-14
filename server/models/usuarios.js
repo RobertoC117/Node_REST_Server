@@ -52,6 +52,8 @@ let UsuarioSchema = new Schema({
 //     return userObject;
 // }
 
+//indicamos que use el plugin "uniqueValidator"
 UsuarioSchema.plugin(uniqueValidator)
 
-module.exports = mongoose.model('Usuario', UsuarioSchema)
+//el nombre de tu modelo debe ser el mismo nombre de la coleccion que afectará en este caso "usuarios"
+module.exports = mongoose.model('usuarios', UsuarioSchema)

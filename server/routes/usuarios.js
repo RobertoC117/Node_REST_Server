@@ -4,6 +4,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt')
 const Usuario = require('../models/usuarios')//Modelo de Usuario
+const _ = require('underscore')//En si la libreria cotiene mas funciones para facilitarte trabajar con estructuras de datos
 const app = express();
 
 app.get('/', (req, res) => {
@@ -25,29 +26,45 @@ app.post('/usuario', (req, res) => {
         role: data.role,
     });
 
-    usuario.save((err, usuarioDB) => {//Guarda el objeto
-
-        if(err){//Si falla envia un codigo de error con la descripcion de este y rompe la funcion
-            return res.status(400).json({
-                ok: false,
-                err,
-            });
-        }
-
+    usuario.save()
+    .then(usuarioDB => {
         usuarioDB.password = null;
-
-        res.json({//Si es exitoso envia un true y muestra los datos del usuario insertado
-            ok: true, 
+        res.json({
+            ok: true,
             usuario: usuarioDB
         })
-
     })
+    .catch(err => {
+        res.status(400).json({
+            ok: false,
+            err,
+        });
+    })
+
 
 });
 
 app.put('/usuario/:id', (req, res) => {
+
     let id = req.params.id;
-    res.json({id})
+    //Validacion filtra del objeto que se le pasa las propiedades permitidas por el arreglo 
+    //para evitra que actualicen la contraseña y otros datos que no deben ser cambiados desde esta seccion
+    let data = _.pick(req.body, ['nombre', 'img', 'email', 'role', 'estado']);
+
+    Usuario.findByIdAndUpdate(id, data, {new: true, runValidators: true})
+    .then(doc => {
+        res.json({
+            ok: true,
+            usuario: doc
+        })
+    })
+    .catch(err => {
+        res.status(400).json({
+            ok: false,
+            err,
+        })
+    })
+
 });
 
 app.delete('/usuario', (req, res) => {
