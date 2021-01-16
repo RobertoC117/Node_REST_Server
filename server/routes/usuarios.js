@@ -19,7 +19,6 @@ app.get('/usuario', (req, res) => {
     //RECUPERACION DEL PARAMETRO SALTO Y VALIDACION
     let salto = req.query.salto || 0;
     salto = parseInt(salto);
-
     salto = isNaN(salto) ? 0 : (salto > 0) ? salto : 0 //Es igual al ejemplo de abajo que esta comentado
 
     // if(isNaN(salto))
@@ -30,7 +29,6 @@ app.get('/usuario', (req, res) => {
     //RECUPERACION DEL PARAMETRO LIMITE Y VALIDACION
     let limite = req.query.limite || 5;
     limite = parseInt(limite);
-
     limite = isNaN(limite) ? 5 : (limite > 0) ? limite : 5
 
     //LOGICA DE PROPIEDADES NETX Y PREVIOUS QUE IRAN EN LA RESPUESTA
@@ -40,21 +38,35 @@ app.get('/usuario', (req, res) => {
     nuevo_salto = (salto - limite > 0) ? salto-limite : 0
     let previous = salto === 0 ? null : req.protocol + '://' + req.get('host') + '/api/usuario?salto=' + nuevo_salto  + '&limite=' + limite;
 
+    let obj = {ok: true, count: null, data: null}
     Usuario.find({}).skip(salto).limit(limite)
     .then(data => {
-        res.json({
-            ok: true,
-            previous,
-            next,
-            data,
-        });
+        obj.data = data;
+        return Usuario.count();
     })
-    .catch(err =>{
-        res.status(400).json({
-            ok: false,
-            err,
-        })
+    .then(count =>{
+        obj.count = count;
+        res.json(obj)
     })
+    .catch(err => {
+        res.status(400).json({ok:false, err})
+    })
+
+    // Usuario.find({}).skip(salto).limit(limite)
+    // .then(data => {
+    //     res.json({
+    //         ok: true,
+    //         previous,
+    //         next,
+    //         data,
+    //     });
+    // })
+    // .catch(err =>{
+    //     res.status(400).json({
+    //         ok: false,
+    //         err,
+    //     })
+    // })
 
 });
 
