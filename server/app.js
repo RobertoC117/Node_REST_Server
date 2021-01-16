@@ -20,6 +20,7 @@ require('./config/config');
 app.use(bodyParser.urlencoded({ extended:false}))
 //Analiza las solicitudes entrantes con cargas útiles JSON (application/json)
 app.use(bodyParser.json());
+
 //ARCHIVO DE RUTAS
 //Requerimos el archivo de rutas y le indicamos por medio de que direccion se debe acceder
 //en este caso seria localhost:3000/acciones/<ruta>
