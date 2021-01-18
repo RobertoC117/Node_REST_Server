@@ -5,9 +5,9 @@ const express = require('express');
 const bcrypt = require('bcrypt')
 const Usuario = require('../models/usuarios')//Modelo de Usuario
 const _ = require('underscore');//En si la libreria cotiene mas funciones para facilitarte trabajar con estructuras de datos
-const { json } = require('body-parser');
-const { isEmpty } = require('underscore');
 const app = express();
+
+//FIXME: Falta validar la recepcion de id como parametros para evitar el castError TODAS LAS RUTAS
 
 app.get('/', (req, res) => {
     res.send("main")
@@ -21,11 +21,6 @@ app.get('/usuario', (req, res) => {
     salto = parseInt(salto);
     salto = isNaN(salto) ? 0 : (salto > 0) ? salto : 0 //Es igual al ejemplo de abajo que esta comentado
 
-    // if(isNaN(salto))
-    //     salto = 0;
-    // else
-    //     salto = salto > 0 ? salto : 0;
-
     //RECUPERACION DEL PARAMETRO LIMITE Y VALIDACION
     let limite = req.query.limite || 5;
     limite = parseInt(limite);
@@ -38,35 +33,21 @@ app.get('/usuario', (req, res) => {
     nuevo_salto = (salto - limite > 0) ? salto-limite : 0
     let previous = salto === 0 ? null : req.protocol + '://' + req.get('host') + '/api/usuario?salto=' + nuevo_salto  + '&limite=' + limite;
 
-    let obj = {ok: true, count: null, data: null}
-    Usuario.find({}).skip(salto).limit(limite)
-    .then(data => {
-        obj.data = data;
-        return Usuario.count();
-    })
-    .then(count =>{
-        obj.count = count;
-        res.json(obj)
-    })
-    .catch(err => {
-        res.status(400).json({ok:false, err})
-    })
-
-    // Usuario.find({}).skip(salto).limit(limite)
-    // .then(data => {
-    //     res.json({
-    //         ok: true,
-    //         previous,
-    //         next,
-    //         data,
-    //     });
-    // })
-    // .catch(err =>{
-    //     res.status(400).json({
-    //         ok: false,
-    //         err,
-    //     })
-    // })
+    let respuesta = {ok: true, count: null, previous, next, data: null}
+    Usuario.find({estado: true})
+                .skip(salto)//El tamaño del salto
+                .limit(limite)//Numero de registros que mostrara
+                .then(data => {
+                    respuesta.data = data;
+                    return Usuario.count({estado: true});
+                })
+                .then(count =>{
+                    respuesta.count = count;
+                    res.json(respuesta)
+                })
+                .catch(err => {
+                    res.status(400).json({ok:false, err})
+                })
 
 });
 
@@ -124,9 +105,34 @@ app.put('/usuario/:id', (req, res) => {
 
 });
 
-app.delete('/usuario', (req, res) => {
-    //res.json({nombre:"Roberto"})
-    res.send("deleteUsuario")
+app.delete('/usuario/:id', (req, res) => {
+    let id = req.params.id;
+
+    //Busca el usuario por el ID
+    Usuario.findById(id, ['estado'])
+    .then((data) => data.estado)
+    .then((estado) => {//Si su estado el falso entonces se supone que ya no existe y no se debe acceder a el, se lanza un error
+        if(!estado)
+            throw new Error('Ups!, Usuario no encontrado')
+        //Si es true entonces existe por lo que se podra eliminar
+        return Usuario.findByIdAndUpdate(id, {estado:false}, {new: true})
+    })
+    .then((data) =>{
+        //Se devuelve el objeto que se elimino
+        res.json({
+            ok: true,
+            data,
+        })
+    })
+    .catch(err => {
+        res.status(400).json({
+            ok: false,
+            err: {
+                message: err.message,
+                ...err
+            }
+        })
+    })
 });
 
 module.exports = app;
