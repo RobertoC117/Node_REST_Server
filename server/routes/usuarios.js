@@ -7,8 +7,6 @@ const Usuario = require('../models/usuarios')//Modelo de Usuario
 const _ = require('underscore');//En si la libreria cotiene mas funciones para facilitarte trabajar con estructuras de datos
 const app = express();
 
-//FIXME: Falta validar la recepcion de id como parametros para evitar el castError TODAS LAS RUTAS
-
 app.get('/', (req, res) => {
     res.send("main")
 });
@@ -39,7 +37,7 @@ app.get('/usuario', (req, res) => {
                 .limit(limite)//Numero de registros que mostrara
                 .then(data => {
                     respuesta.data = data;
-                    return Usuario.count({estado: true});
+                    return Usuario.countDocuments({estado: true});
                 })
                 .then(count =>{
                     respuesta.count = count;

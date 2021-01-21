@@ -45,12 +45,16 @@ let UsuarioSchema = new Schema({
     }
 });
 
-// UsuarioSchema.methods.toJSON =  function(){
-//     let user = this;
-//     let userObject = user.toObject();
-//     delete userObject.password;
-//     return userObject;
-// }
+//Editamos el metodo toJSON ahora cada que se parsea a JSON se ejecuta este metodo
+//normalmente se ejecuta al mandar un objeto de este esquema en la respuesta del servidor
+//elimina la propiedad password para evitar mandarla en la respuesta
+UsuarioSchema.methods.toJSON =  function(){
+    let user = this;
+    let userObject = user.toObject();
+    delete userObject.password;
+    console.log("Conversion")
+    return userObject;
+}
 
 //indicamos que use el plugin "uniqueValidator"
 UsuarioSchema.plugin(uniqueValidator)

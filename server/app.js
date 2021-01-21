@@ -13,8 +13,13 @@ const app = express();
 require('./config/config');
 
 /**
- * MIDDLEWARES
+ * FIXME: Por arreglar falta:
+ * La validacion de id cuando se recibe como parametro, evitar castError
+ * Evitar devolver la passwd en las respuestas, sin utilizar el metodo que lo elimina del objeto cada que lo parseamos a JSON
+ * Hacer los hasheos y demas metodos de bcrypt asincronos(por recomendacion del desarrollador)
  */
+
+//MIDDLEWARES
 
 //Middleware que decodifica los formularios(en este caso application/x-www-form-urlencoded)
 app.use(bodyParser.urlencoded({ extended:false}))
@@ -23,13 +28,15 @@ app.use(bodyParser.json());
 
 //ARCHIVO DE RUTAS
 //Requerimos el archivo de rutas y le indicamos por medio de que direccion se debe acceder
-//en este caso seria localhost:3000/acciones/<ruta>
-app.use('/api', require('./routes/usuarios'))
+//en este caso seria localhost:3000/api/<ruta>
+app.use('/api', require('./routes/index'))
 
-mongoose.connect('mongodb://localhost:27017/cafe', {useNewUrlParser: true, useUnifiedTopology: true} ,(err) =>{
-    if(err) throw err;  
-
-    console.log('Conectado :)')
+mongoose.connect(process.env.URL_CONNECTION, {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true})
+.then(()=>{
+    console.log("Connected :)");
+})
+.catch((err)=>{
+    console.log(err)
 });
 
 app.listen(process.env.PORT ,()=>{
