@@ -5,6 +5,7 @@
 //IMPORTACIONES
 const express = require('express');
 const mongoose = require('mongoose');
+const { auth } = require('./middlewares/auth')
 const bodyParser = require('body-parser');//Ya no es necesario express cubre la funcionaidad de esta libreria
 
 const app = express();
@@ -25,6 +26,8 @@ require('./config/config');
 app.use(bodyParser.urlencoded({ extended:false}))
 //Analiza las solicitudes entrantes con cargas útiles JSON (application/json)
 app.use(bodyParser.json());
+
+//app.use(auth)
 
 //ARCHIVO DE RUTAS
 //Requerimos el archivo de rutas y le indicamos por medio de que direccion se debe acceder

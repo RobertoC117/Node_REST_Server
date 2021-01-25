@@ -6,12 +6,14 @@ const bcrypt = require('bcrypt')
 const Usuario = require('../models/usuarios')//Modelo de Usuario
 const _ = require('underscore');//En si la libreria cotiene mas funciones para facilitarte trabajar con estructuras de datos
 const app = express();
+const { auth, verifyRole } = require('../middlewares/auth')
 
 app.get('/', (req, res) => {
     res.send("main")
 });
 
-app.get('/usuario', (req, res) => {
+//Como segunda argumento enviamos el o los middlewares a utilizar
+app.get('/usuario', auth, (req, res) => {
 
     //Se manejan parametros opcionales que se almacenan en el objeto query de la peticion(pueden o no existir)
     //RECUPERACION DEL PARAMETRO SALTO Y VALIDACION
@@ -49,7 +51,7 @@ app.get('/usuario', (req, res) => {
 
 });
 
-app.post('/usuario', (req, res) => {
+app.post('/usuario',  [auth, verifyRole], (req, res) => {
 
     let body = req.body;//Obtiene el cuerpo de la peticion
 
@@ -78,7 +80,7 @@ app.post('/usuario', (req, res) => {
 
 });
 
-app.put('/usuario/:id', (req, res) => {
+app.put('/usuario/:id', [auth, verifyRole], (req, res) => {
 
     let id = req.params.id;
     //Validacion filtra del objeto que se le pasa las propiedades permitidas por el arreglo 
@@ -103,7 +105,7 @@ app.put('/usuario/:id', (req, res) => {
 
 });
 
-app.delete('/usuario/:id', (req, res) => {
+app.delete('/usuario/:id', [auth, verifyRole], (req, res) => {
     let id = req.params.id;
 
     //Busca el usuario por el ID

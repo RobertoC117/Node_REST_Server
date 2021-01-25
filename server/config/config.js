@@ -35,4 +35,4 @@
  /**
   * 60 s * 60 min * 24 horas * 30 = 30 dias
   */
- process.env.EXP_TOKEN = 60 *60 * 24 * 30;//30 DIAS
+ process.env.EXP_TOKEN = "30d";//30 DIAS

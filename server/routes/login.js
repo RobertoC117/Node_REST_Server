@@ -31,6 +31,7 @@ app.post("/login",(req, res) => {
             })
         }
 
+        //Creacion del token con una clave declarada en /config/config.js al igual que el tiempo de vida del token
         let token = jwt.sign({usuario}, process.env.SEED_AUTH, {expiresIn: process.env.EXP_TOKEN})
 
         res.json({
