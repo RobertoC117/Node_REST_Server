@@ -7,6 +7,6 @@ const app = express();
  */
 
 app.use(require('./login'))
-app.use(require('./usuarios'))
+app.use(require('./users'))
 
 module.exports = app;

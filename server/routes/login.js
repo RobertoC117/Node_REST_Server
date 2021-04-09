@@ -1,56 +1,16 @@
-const express = require('express');
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
-const Usuario = require('../models/usuarios')//Modelo de Usuario
-const app = express();
+const {Router} = require('express');
+const Usuario = require('../models/usuario')//Modelo de Usuario
+const router = Router();
+const {logIn} = require('../controllers/login.controller')
 
-app.post("/login",(req, res) => {
+const { check } = require('express-validator')//verifica cualquier valor que venga en parametro, query o body del request
+const { checkValidationErrors } = require('../middlewares/validations')//Verifica los errores que hubo
 
-    let body = req.body;
+//Ruta de logeo
+router.post("/login", [
+    check('email','Este no es un email valido').isEmail(), //Valida el email
+    check('password','El password es requerido').exists({checkFalsy: true}), //Valida contraseña ("", null, false, 0)
+    checkValidationErrors//Verifica si existe algun error en las validaciones antes de ejecutar la accion de la ruta
+],logIn);
 
-    Usuario.findOne({email: body.email})
-    .then((usuario) =>{
-
-        if(!usuario)
-        {
-            return res.status(400).json({
-                ok:false,
-                err:{
-                    message:"(Usuario) o contraseña incorrectos"
-                }
-            })
-        }
-
-        if(!bcrypt.compareSync(body.password, usuario.password))
-        {
-            return res.status(400).json({
-                ok:false,
-                err:{
-                    message:"Usuario o (contraseña) incorrectos"
-                }
-            })
-        }
-
-        //Creacion del token con una clave declarada en /config/config.js al igual que el tiempo de vida del token
-        let token = jwt.sign({usuario}, process.env.SEED_AUTH, {expiresIn: process.env.EXP_TOKEN})
-
-        res.json({
-            ok: true,
-            usuario,
-            token
-        })
-
-    })
-    .catch((err) =>{
-        console.log(err)
-        res.status(500).json({
-            ok: false,
-            err: {
-                message: err.message,
-                body: err
-            }
-        })
-    })
-});
-
-module.exports = app;
+module.exports = router;

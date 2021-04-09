@@ -1,25 +1,14 @@
-/**
- * ADMINISTRACION DE LAS RUTAS DE LOS USUARIOS
- */
-const express = require('express');
 const bcrypt = require('bcrypt')
-const Usuario = require('../models/usuarios')//Modelo de Usuario
+const Usuario = require('../models/usuario')//Modelo de Usuario
 const _ = require('underscore');//En si la libreria cotiene mas funciones para facilitarte trabajar con estructuras de datos
-const app = express();
-const { auth, verifyRole } = require('../middlewares/auth')
 
-app.get('/', (req, res) => {
-    res.send("main")
-});
-
-//Como segunda argumento enviamos el o los middlewares a utilizar
-app.get('/usuario', auth, (req, res) => {
-
+const getUsers = (req, res) =>{
     //Se manejan parametros opcionales que se almacenan en el objeto query de la peticion(pueden o no existir)
+    //Estos parametros son los que vienen explicitamente en la URL
     //RECUPERACION DEL PARAMETRO SALTO Y VALIDACION
     let salto = req.query.salto || 0;
     salto = parseInt(salto);
-    salto = isNaN(salto) ? 0 : (salto > 0) ? salto : 0 //Es igual al ejemplo de abajo que esta comentado
+    salto = isNaN(salto) ? 0 : (salto > 0) ? salto : 0 
 
     //RECUPERACION DEL PARAMETRO LIMITE Y VALIDACION
     let limite = req.query.limite || 5;
@@ -48,23 +37,26 @@ app.get('/usuario', auth, (req, res) => {
                 .catch(err => {
                     res.status(400).json({ok:false, err})
                 })
+}
 
-});
+const createUser = (req, res) =>{
 
-app.post('/usuario',  [auth, verifyRole], (req, res) => {
+    //Obtiene las propiedades del cuerpo de la peticion
+    const {nombre, email, password, role} = req.body;
 
-    let body = req.body;//Obtiene el cuerpo de la peticion
+    //Cantidad de vueltas para encriptar la contraseña, por defecto es 10
+    const salt = bcrypt.genSaltSync();
 
-    let usuario = new Usuario({//Crea un nuevo objeto del modelo
-        nombre: body.nombre,
-        email: body.email,
-        password: bcrypt.hashSync( body.password, 10),
-        role: body.role,
+    //Crea un nuevo objeto del modelo
+    let usuario = new Usuario({
+        nombre: nombre,
+        email: email,
+        password: bcrypt.hashSync(password, salt),
+        role: role,
     });
 
     usuario.save()
     .then(usuarioDB => {
-        usuarioDB.password = null;
         res.json({
             ok: true,
             data: usuarioDB
@@ -76,20 +68,27 @@ app.post('/usuario',  [auth, verifyRole], (req, res) => {
             err,
         });
     })
+}
 
+const updateUser = (req, res) =>{
 
-});
+    const {id} = req.params;
 
-app.put('/usuario/:id', [auth, verifyRole], (req, res) => {
-
-    let id = req.params.id;
     //Validacion filtra del objeto que se le pasa las propiedades permitidas por el arreglo 
     //para evitra que actualicen la contraseña y otros datos que no deben ser cambiados desde esta seccion
-    let body = _.pick(req.body, ['nombre', 'img', 'email', 'role', 'estado']);
+    //la variable resto es un objeto con las demas propiedades que no son las extraidas en esa misma linea
+    const {_id, password, google, estado, correo, ...resto} = req.body;
 
-    //console.log(isEmpty(body));
+    //Identifica si se desea actualizar la contraseña, es decir si viene en el cuerpo de la peticion
+    //de ser asi se encripta para actualizarla
+    if(password){
+        const salt = bcrypt.genSaltSync();
+        resto.password = bcrypt.hashSync(password, salt)
+    }
 
-    Usuario.findByIdAndUpdate(id, body, {new: true, runValidators: true})
+    //La propiedad context:'query' se usa por razones tecnicas ya que al parecer mongoose-unique-validator 
+    //no corre automaticamente las validaciones al actualizar
+    Usuario.findByIdAndUpdate(id, resto, {new: true, runValidators: true, context:'query'})
     .then(doc => {
         res.json({
             ok: true,
@@ -97,24 +96,24 @@ app.put('/usuario/:id', [auth, verifyRole], (req, res) => {
         })
     })
     .catch(err => {
+        console.log(err)
         res.status(400).json({
             ok: false,
             err,
         })
     })
+}
 
-});
-
-app.delete('/usuario/:id', [auth, verifyRole], (req, res) => {
-    let id = req.params.id;
-
+const deleteUser = (req, res) =>{
+    let {id} = req.params;
+    let usuarioAutenticado =  req.usuarioAutenticado;
     //Busca el usuario por el ID
     Usuario.findById(id, ['estado'])
     .then((data) => data.estado)
     .then((estado) => {//Si su estado el falso entonces se supone que ya no existe y no se debe acceder a el, se lanza un error
         if(!estado)
             throw new Error('Ups!, Usuario no encontrado')
-        //Si es true entonces existe por lo que se podra eliminar
+        //Si es true entonces existe por lo que se podra inhabilitar
         return Usuario.findByIdAndUpdate(id, {estado:false}, {new: true})
     })
     .then((data) =>{
@@ -122,6 +121,7 @@ app.delete('/usuario/:id', [auth, verifyRole], (req, res) => {
         res.json({
             ok: true,
             data,
+            usuarioAutenticado
         })
     })
     .catch(err => {
@@ -133,6 +133,11 @@ app.delete('/usuario/:id', [auth, verifyRole], (req, res) => {
             }
         })
     })
-});
+}
 
-module.exports = app;
+module.exports = {
+    getUsers,
+    createUser,
+    updateUser,
+    deleteUser
+}
