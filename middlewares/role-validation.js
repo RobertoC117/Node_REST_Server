@@ -37,7 +37,7 @@ const tieneRole = (...roles) => (req, res, next) =>{
     }
 
     let {role, nombre} = req.usuarioAutenticado
-    if(roles.includes(role)){
+    if(!roles.includes(role)){
         return res.status(401).json({
             ok: false,
             err:{
