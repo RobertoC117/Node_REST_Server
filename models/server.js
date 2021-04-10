@@ -31,6 +31,9 @@ class Server{
         this.app.use(express.urlencoded({ extended:false}))
         //Analiza las solicitudes entrantes con cargas útiles JSON (application/json)
         this.app.use(express.json());
+        //Sirve contenido estatico
+        this.app.use('/', express.static('public'))
+        console.log(__dirname)
     }
 
     routes(){
