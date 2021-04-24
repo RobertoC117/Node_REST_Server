@@ -4,9 +4,45 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <meta name="google-signin-client_id" content="414353128299-mca8129pmlaue4h9ono6faic997dph63.apps.googleusercontent.com">
     <title>Node Rest-Server Café</title>
 </head>
 <body>
-    <h1>Hola mundo XD</h1>
+    <h1>Google Sign In</h1>
+    <div class="g-signin2" data-onsuccess="onSignIn"></div>
+    <a href="#" onclick="signOut();">Sign out</a>
+    <script>
+        console.log(window.location)
+        let url = window.location.origin + "/api/googleSignIn"
+        console.log(url)
+        function onSignIn(googleUser) {
+            var profile = googleUser.getBasicProfile();
+            console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+            console.log('Name: ' + profile.getName());
+            console.log('Image URL: ' + profile.getImageUrl());
+            console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+            var id_token = googleUser.getAuthResponse().id_token;
+            fetch(url, {
+                method: 'POST',
+                headers:{'Content-Type':'application/json', 'id_token': id_token}
+            })
+            .then(res =>res.json())
+            .then(data => {
+                console.log("Mi server:", data)
+            })
+            .catch(err => {
+                console.log(err)
+            })
+            console.log(id_token)
+        }
+
+        function signOut() {
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function () {
+            console.log('User signed out.');
+            });
+        }
+    </script>
 </body>
 </html>
