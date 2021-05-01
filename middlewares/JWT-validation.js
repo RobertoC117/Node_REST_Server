@@ -1,5 +1,5 @@
 const { verificarJWT } = require('../helpers/JWT-helpers')
-const Usuario = require('../models/usuario')
+const {Usuario} = require('../models')
 
 //Verifica token
 const JWT_validator = (req, res, next) => {
@@ -21,7 +21,7 @@ const JWT_validator = (req, res, next) => {
     .then(token_data => {//Retorna lo que existe en el token (el id en este caso)
         return Usuario.findById(token_data.uid)
     })
-    .then(usuario =>{//Verifica si el usuario esta habilitado si no manda error
+    .then(usuario =>{//Verifica si el usuario que hace la solicitud esta habilitado si no manda error
         if(!usuario.estado){
             throw new Error('Este usuario no tiene los permisos necesarios -estado:false')
         }

@@ -1,6 +1,7 @@
 const Role = require('../models/role')
-const Usuario = require('../models/usuario')
+const {Usuario, Categoria} = require('../models')
 
+//#region VALIDACIONES USUARIO
 //verifica si el rol que se ingresa esta registrado en la DB (create, update)
 const roleValidator = (role='') => {
     return Role.findOne({role}).then(exist =>{
@@ -24,9 +25,28 @@ const existeUsuarioId = (id = '') =>{
             return Promise.reject(`El id ${id} no existe`)
     })
 }
+//#endregion
 
+//#region VALIDACIONES CATEGORIAS
+const existeCategoria = (id = '') =>{
+    return Categoria.findById(id).then(categoria =>{
+        if(!categoria)
+            return Promise.reject(`La categoria con el id ${id} no existe`)
+    })
+}
+
+const existeNombreCategoria = (nombre) =>{
+    nombre = nombre.toUpperCase()
+    return Categoria.findOne({nombre}).then(res =>{
+        if(res)
+            return Promise.reject(`La categoria ${nombre} ya existe`)
+    })
+}
+//#endregion
 module.exports = {
     roleValidator,
     existeEmail,
-    existeUsuarioId
+    existeUsuarioId,
+    existeCategoria,
+    existeNombreCategoria
 }

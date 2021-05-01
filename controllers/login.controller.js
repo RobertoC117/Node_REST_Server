@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt')
-const Usuario = require('../models/usuario')//Modelo de Usuario
+const {Usuario} = require('../models')//Modelo de Usuario
 const { generarJWT } = require('../helpers/JWT-helpers');
 const { googleVerify } = require('../helpers/google-verify');
 

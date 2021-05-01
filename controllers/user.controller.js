@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt')
-const Usuario = require('../models/usuario')//Modelo de Usuario
+const {Usuario} = require('../models')//Modelo de Usuario
 const _ = require('underscore');//En si la libreria cotiene mas funciones para facilitarte trabajar con estructuras de datos
 
 const getUsers = (req, res) =>{
@@ -20,7 +20,7 @@ const getUsers = (req, res) =>{
     let next = req.protocol + '://' + req.get('host') + '/api/usuario?salto=' + nuevo_salto + '&limite=' + limite;
 
     nuevo_salto = (salto - limite > 0) ? salto-limite : 0
-    let previous = salto === 0 ? null : req.protocol + '://' + req.get('host') + '/api/usuario?salto=' + nuevo_salto  + '&limite=' + limite;
+    let previous = salto <= 0 ? null : req.protocol + '://' + req.get('host') + '/api/usuario?salto=' + nuevo_salto  + '&limite=' + limite;
 
     let respuesta = {ok: true, count: null, previous, next, data: null}
     Usuario.find({estado: true})
