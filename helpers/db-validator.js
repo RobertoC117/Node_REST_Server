@@ -1,5 +1,5 @@
 const Role = require('../models/role')
-const {Usuario, Categoria} = require('../models')
+const {Usuario, Categoria, Producto} = require('../models')
 
 //#region VALIDACIONES USUARIO
 //verifica si el rol que se ingresa esta registrado en la DB (create, update)
@@ -43,10 +43,21 @@ const existeNombreCategoria = (nombre) =>{
     })
 }
 //#endregion
+
+//#region VALIDACIONES PRODUCTOS
+const existeProductoID = (id = '') =>{
+    return Producto.findById(id).then(producto => {
+        if(!producto)
+            return Promise.reject(`El producto con id ${id} no existe`)
+    })
+}
+//#endregion
+
 module.exports = {
     roleValidator,
     existeEmail,
     existeUsuarioId,
     existeCategoria,
-    existeNombreCategoria
+    existeNombreCategoria,
+    existeProductoID
 }

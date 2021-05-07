@@ -42,7 +42,7 @@ const obtenerCategorias = async(req, res) =>{
 
         let nuevo_salto = salto + limite
         let next = req.protocol + '://' + req.get('host') + '/api/categorias?salto=' + nuevo_salto + '&limite=' + limite;
-        nuevo_salto = 1
+        nuevo_salto = (salto - limite > 0) ? salto-limite : 0
         let previous = salto <= 0 ? null : req.protocol + '://' + req.get('host') + '/api/categorias?salto=' + nuevo_salto + '&limite=' + limite;
 
         // const categorias = await Categoria.find({estado:true}).skip(salto).limit(limite).populate('usuario')
